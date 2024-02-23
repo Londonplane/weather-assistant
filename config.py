@@ -1,0 +1,6 @@
+
+OPENMETEO_ENDPOINT = "https://api.open-meteo.com/v1/forecast"
+CACHE_DIR = '.cache'
+CACHE_EXPIRE_AFTER = 3600
+RETRY_ATTEMPTS = 5
+RETRY_BACKOFF_FACTOR = 0.2
