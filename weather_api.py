@@ -13,41 +13,47 @@ class WeatherAPI:
         # 初始化OpenMeteo API客户端
         self.client = openmeteo_requests.Client(session=retry_session)
         self.geolocator = Nominatim(user_agent="weather_assistant")
-
-    def get_location(self, city):
-        # 使用Nominatim获取城市的经纬度
-        location = self.geolocator.geocode(city)
-        return location
     
-    # response 分开处理？比如getCurrentTem
-    def get_weather_data(self, city):
-        # 获取地理位置信息
-        location = self.get_location(city)
+    def get_weather_data(self, city, forecast_type="current"):
+        # location.raw (all info for location) 
+        location = self.geolocator.geocode(city) 
 
         params = {
             "latitude": location.latitude,
             "longitude": location.longitude,
-            "current": "temperature_2m",
             "forecast_days": 1
         }
+
+        # 根据forecast_type调整params字典
+        if forecast_type == "current":
+            params["current"] = ["temperature_2m", "wind_speed_10m"]
+        elif forecast_type == "daily":
+            params["daily"] = ["temperature_2m_max", "temperature_2m_min", "precipitation_probability_mean", "wind_speed_10m_max"]
+        else:
+            raise ValueError("Invalid forecast_type. Expected 'current' or 'daily'.")
 
         weather_data = self.client.weather_api(OPENMETEO_ENDPOINT, params=params)
         return weather_data[0]
 
-    def get_current_temperature_2m(self, city):
+
+
+    def get_current_weather(self, city):
         current = self.get_weather_data(city).Current()
+        
         current_temperature_2m = current.Variables(0).Value()
-        return current_temperature_2m
+        current_wind_speed_10m = current.Variables(1).Value()
+        
+        return current_temperature_2m,current_wind_speed_10m
+    
+    def get_daily_weather(self, city):
+        daily = self.get_weather_data(city).Daily()
+        
+        daily_temperature_2m_max = daily.Variables(0).ValuesAsNumpy
+        daily_temperature_2m_min = daily.Variables(1).ValuesAsNumpy
+        daily_precipitation_probability_mean = daily.Variables(2).ValuesAsNumpy()
+        daily_wind_speed_10m_max = daily.Variables(3).ValuesAsNumpy()
+
+        return daily_temperature_2m_max,daily_temperature_2m_min,daily_precipitation_probability_mean,daily_wind_speed_10m_max
+        
 
 
-
-
-""" # print(dir(response))
-print(f"City Berlin")
-print(f"Coordinates {response.Latitude()}°N {response.Longitude()}°E")
-print(f"Elevation {response.Elevation()} m asl")
-print(f"Timezone {response.Timezone()} {response.TimezoneAbbreviation()}")
-print(f"Timezone difference to GMT+0 {response.UtcOffsetSeconds()} s")
-
-print(f"Current time {current.Time()}")
-print(f"Current temperature_2m {current_temperature_2m}") """
