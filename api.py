@@ -2,6 +2,7 @@ import json
 from openai import OpenAI
 client = OpenAI()
 
+# date: Year默认2024，Month,Day需要强制User正确输入, like "tomorrow" 在调用weather_api处理
 tools = [
     {
         "type": "function",
@@ -34,7 +35,7 @@ tools = [
                     },
                     "date": {
                         "type": "string",
-                        "description": "The specific date for the weather forecast, in YYYY-MM-DD format, or a relative day such as 'today', 'tomorrow', or 'day after tomorrow'."
+                        "description": "The specific date for the weather forecast, in YYYY-MM-DD format, or a relative day such as 'today', 'tomorrow', or 'day after tomorrow'. By default, the year is set to 2024."
                     },
                 },
                 "required": ["location", "date"]
