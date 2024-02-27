@@ -71,8 +71,8 @@ tools = [
 ]
 
 
-def get_completion(msg):
-    messages = [{"role": "user", "content": msg}]
+def get_completion(message):
+    messages = [{"role": "user", "content": message}]
 
     completion = client.chat.completions.create(
         model="gpt-3.5-turbo", messages=messages, tools=tools, tool_choice="auto"
